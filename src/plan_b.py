@@ -32,14 +32,15 @@ import csv
 from java_finder import find_java11          # user-supplied util
 
 # ═════════════════ config ════════════════════════════════════════════════
-SEED, NUM_PROJECTS, BUG_REV = 2025, 1, "1f"
-GPT_MODEL         = "gpt-4o-mini"            # put any model name; prompt left blank
+SEED, NUM_PROJECTS, BUG_REV = 2025, 5, "1f"
+GPT_MODEL         = "o4-mini"            # put any model name; prompt left blank
 MAX_PARALLEL_GPT  = 100
 EVOSUITE_MEM_MB   = 4096
 
 ROOT         = Path(__file__).resolve().parents[1]
 RESULTS_DIR   = ROOT / "results"
 EVOSUITE_JAR  = ROOT / "src/tools/evosuite.jar"
+total_tokens = 0
 
 # ═══════════════ environment ═════════════════════════════════════════════
 load_dotenv(ROOT / ".env")
@@ -156,7 +157,7 @@ Here is the *exact* source code of `{{FQCN}}`:
 def sanitize(fqcn: str, code: str) -> str:
     newname = fqcn.split('.')[-1]+"GptTest"
     return re.sub(r'\bclass\s+\w+', f'class {newname}', code, count=1)
-total_tokens = 0
+
 def gpt_tests(work: Path, skip_existing: bool):
     tests_rel = subprocess.check_output(
         ["defects4j","export","-p","dir.src.tests"], cwd=work, env=ENV, text=True).strip()
@@ -190,8 +191,9 @@ def gpt_tests(work: Path, skip_existing: bool):
         return fqcn, text, tokens
 
     async def _run():
+        global total_tokens
         sem = asyncio.Semaphore(MAX_PARALLEL_GPT)
-        coros = [_ask(fqcn, sem) for fqcn,_,tokens in to_run]
+        coros = [_ask(fqcn, sem) for fqcn,_ in to_run]
         
         bar = tqdm(total=len(coros), desc="   GPT", unit="test")
         for fut in asyncio.as_completed(coros):
@@ -199,7 +201,7 @@ def gpt_tests(work: Path, skip_existing: bool):
             if res:
                 fqcn, src, tokens = res
                 (tests_dir/f"{fqcn.split('.')[-1]}GptTest.java").write_text(src)
-                total_tokens += tokens
+                if tokens : total_tokens += tokens
             bar.update(1)
         bar.close()
     asyncio.run(_run())
@@ -224,7 +226,6 @@ def prune(work: Path) -> None:
         cwd=work, env=ENV, text=True).strip()
     kept = 0
     removed = 0
-    len_active = 0
     while True:
         active = sorted(tests_dir.rglob("*GptTest.java"))
         if not active:
@@ -256,11 +257,11 @@ def prune(work: Path) -> None:
             progress_made = True
             # restart scan: removal might unblock others
             break
-        len_active += len(active) - 1
+        
         if not progress_made:
             # nothing failed in this iteration → all remaining files compile
             break
-    print(f"   ⚠️  {removed} GPT tests disabled, {kept} kept, {len_active} total")
+    print(f"   ⚠️  {removed} GPT tests disabled, {kept} kept, {kept + removed} total")
         
 
 # ═══════════════ coverage (compile) ═════════════════════════════
