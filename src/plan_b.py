@@ -166,7 +166,7 @@ def gpt_tests(work: Path, skip_existing: bool):
         ["defects4j","export","-p","classes.relevant"], cwd=work, env=ENV, text=True).splitlines()
     to_run = [(c, tests_dir/f"{c.split('.')[-1]}GptTest.java")
               for c in classes if not (skip_existing and (tests_dir/f"{c.split('.')[-1]}GptTest.java").exists())]
-    if not to_run: print("   ⏩  all GPT tests present"); return
+    if not to_run: print("   ⏩  all GPT tests present"); return None, None, 0
 
     src_root = work / subprocess.check_output(
         ["defects4j","export","-p","dir.src.classes"], cwd=work, env=ENV, text=True).strip()
@@ -174,7 +174,7 @@ def gpt_tests(work: Path, skip_existing: bool):
 
     async def _ask(fqcn:str, sem:asyncio.Semaphore):
         path = src_map.get(fqcn); 
-        if not path or not path.is_file(): return None
+        if not path or not path.is_file(): return None, None, 0
         user_prompt = PROMPT.replace("{CODE}", path.read_text()).replace("{FQCN}", fqcn)
         tokens = 0
         async with sem:
