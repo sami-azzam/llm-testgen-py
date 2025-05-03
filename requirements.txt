@@ -1,0 +1,7 @@
+openai>=1.13.3          # async ChatCompletion
+pandas>=2.2.2
+lxml>=5.2.1             # fast coverage.xml parsing
+tabulate>=0.9.0         # pretty console table
+python-dotenv>=1.0.1    # loads .env automatically
+tqdm>=4.66
+csv
