@@ -71,7 +71,7 @@ def find_project_gpt_dirs(run_dir: Path, project: str) -> List[Path]:
     """Return first-level sub-dirs that start with *project* and end with '_gpt'."""
     return [
         d for d in run_dir.iterdir()
-        if d.is_dir() and d.name.startswith(project) and d.name.endswith("_evo")
+        if d.is_dir() and d.name.startswith(project) and d.name.endswith("_gpt")
     ]
 
 
