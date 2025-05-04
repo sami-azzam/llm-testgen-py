@@ -1,0 +1,11 @@
+project,generator,line_%,branch_%
+Gson,EvoSuite,79.32,70.47
+Gson,o4-mini,80.27,71.03
+Math,EvoSuite,87.28,83.4
+Math,o4-mini,87.32,83.55
+Jsoup,EvoSuite,89.46,80.88
+Jsoup,o4-mini,92.84,86.26
+Collections,EvoSuite,80.92,75.92
+Collections,o4-mini,81.57,76.76
+JxPath,EvoSuite,74.7,56.98
+JxPath,o4-mini,79.35,60.76

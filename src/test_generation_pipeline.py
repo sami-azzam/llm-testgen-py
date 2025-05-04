@@ -7,7 +7,7 @@ Benchmark Defects4J bugs with
   • EvoSuite          (search-based, Java 6 target)
   • GPT               (LLM-based, user-supplied prompt)
 
-Plan B keeps every build at Java 6 and avoids Cobertura by compiling with
+Keeps every build at Java 6 and compiles with
 `defects4j compile`.  JaCoCo is used for coverage.
 """
 
@@ -18,6 +18,7 @@ from pathlib import Path
 from datetime import datetime
 import argparse
 from typing import List, Tuple
+import csv
 
 # ─────────────── third-party ──────────────────────────────────────────────
 import pandas as pd
@@ -25,7 +26,6 @@ from dotenv import load_dotenv
 from openai import AsyncOpenAI
 from tabulate import tabulate
 from tqdm import tqdm
-import csv
 
 
 # ─────────────── helper ───────────────────────────────────────────────────
@@ -33,7 +33,7 @@ from java_finder import find_java11          # user-supplied util
 
 # ═════════════════ config ════════════════════════════════════════════════
 SEED, NUM_PROJECTS, BUG_REV = 2025, 5, "1f"
-GPT_MODEL         = "gpt-4.1-mini"            # put any model name; prompt left blank
+GPT_MODEL         = "gpt-4o-mini"            # put any model name; prompt left blank
 MAX_PARALLEL_GPT  = 100
 EVOSUITE_MEM_MB   = 4096
 
@@ -300,7 +300,7 @@ def coverage(work: Path, tag: str, proj: str) -> dict:
                    cwd=work, env=ENV,
                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-    # 4 · read Defects4J’s summary.csv (still generated next to coverage.xml)
+    # 4 · read Defects4J’s summary.csv
     csv_file = work / "summary.csv"
     if not csv_file.exists():
         return {"project": proj, "generator": tag,

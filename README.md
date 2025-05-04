@@ -3,7 +3,13 @@
 ```bash
 # inside the project root
 python3 -m venv .venv          # create
-source .venv/bin/activate      # activate (fish: source .venv/bin/activate.fish; Windows: .venv\Scripts\activate)
+# If in Windows:
+.venv\Scripts\activate
+# ---
+# If in macOS / Linux:
+source .venv/bin/activate
+# ---
+
 python -m pip install --upgrade pip wheel
 ```
 
@@ -15,15 +21,30 @@ python -m pip install --upgrade pip wheel
 pip install -r requirements.txt
 ```
 
-## 2  Run the benchmark
-
+## 2  Setup the dataset
 ```bash
-export OPENAI_API_KEY="<your-key>"
-export PATH=$PATH:$HOME/defects4j/framework/bin     # once per shell
-python test_generation_pipeline.py
+mkdir data
+cd data
+git clone https://github.com/rjust/defects4j
+cd defects4j
+cpanm --installdeps .
+./init.sh
 ```
 
-## 3  Deactivate when you’re done
+
+## 3  Run the benchmark
+
+### IMPORTANT:
+Please go to the .env file and fill in your OpenAI API Key first.
+
+Also, before running, please go to  test_generation_pipeline.py and check or adjust the configuration in line 35.
+
+### Please run 
+```bash
+python3 test_generation_pipeline.py
+```
+
+## 4  Deactivate when you’re done
 
 ```bash
 deactivate
@@ -47,4 +68,4 @@ echo "✔  venv ready.  Run:  source .venv/bin/activate"
 
 Now your whole Defects4J + EvoSuite + GPT tool-chain lives inside `.venv` and can be nuked with a simple `rm -rf .venv` if you ever want a clean slate.
 
-That’s it, man. 🚀
+That’s it, Happy testing! 🚀
